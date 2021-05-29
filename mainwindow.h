@@ -22,9 +22,6 @@ private slots:
     void on_moveRight_clicked();
 
 private:
-    std::vector<uint8_t> tryParceByteArray(const QString &text);
-    unsigned int tryParsePolynom(const QString &text);
-
     Ui::MainWindow *ui;
 };
 #endif // MAINWINDOW_H

@@ -10,12 +10,14 @@ CONFIG += c++11
 
 SOURCES += \
     crc.cpp \
+    crchelper.cpp \
     huffman.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     crc.h \
+    crchelper.h \
     huffman.h \
     mainwindow.h
 
