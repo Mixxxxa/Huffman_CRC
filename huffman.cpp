@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <iostream>
 #include <functional>
+#include <cmath>
 
 static constexpr char NullValue = 0;
 
@@ -48,7 +49,7 @@ Huffman::TreeNode::ptr Huffman::generateTree(const Huffman::FrequencyTable &tabl
     return collection.top();
 }
 
-std::map<char, std::string> Huffman::getCodes(Huffman::TreeNode::ptr root) const
+Huffman::CodesTable Huffman::getCodes(Huffman::TreeNode::ptr root) const
 {
     if(!root)
         throw std::runtime_error("Ошибка генерации кодов");
@@ -74,4 +75,62 @@ std::map<char, std::string> Huffman::getCodes(Huffman::TreeNode::ptr root) const
     };
     getCode(root, "");
     return result;
+}
+
+std::string Huffman::encode(const std::string& text, const Huffman::CodesTable &table) const
+{
+    std::string result;
+    for(const auto& ch : text)
+        result += table.at(ch);
+    return result;
+}
+
+std::string Huffman::decode(const std::string &text, const Huffman::CodesTable &table) const
+{
+    std::string encodedText = text;
+    std::string decodedText;
+    std::string buffer;
+
+    while (!encodedText.empty())
+    {
+        buffer += encodedText.at(0);
+        encodedText.erase(encodedText.begin());
+        for(const auto& [key, value] : table)
+        {
+            if(value == buffer)
+            {
+                decodedText += key;
+                buffer.clear();
+                break;
+            }
+        }
+    }
+    return decodedText;
+}
+
+double Huffman::avgCodeLenght(const std::string &text, const Huffman::FrequencyTable &freq, const Huffman::CodesTable &codes) const
+{
+    const double textLength = static_cast<double>(text.size());
+
+    double avgLength = 0;
+    for(const auto& [ch, count] : freq)
+    {
+        const double p = static_cast<double>(count) / textLength;
+        const double codeSize = static_cast<double>(codes.at(ch).size());
+        avgLength += p * codeSize;
+    }
+    return avgLength;
+}
+
+double Huffman::entropy(const std::string &text, const Huffman::FrequencyTable &table) const
+{
+    const double textLength = static_cast<double>(text.size());
+    double ret = 0;
+
+    for(const auto& [ch, count] : table)
+    {
+        const double p = static_cast<double>(count) / textLength;
+        ret += p * log2(p);
+    }
+    return abs(ret);
 }

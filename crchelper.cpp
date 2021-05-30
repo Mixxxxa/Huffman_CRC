@@ -1,6 +1,7 @@
 #include "crchelper.h"
 #include <stdexcept>
 #include <QRegularExpression>
+#include <QDebug>
 
 unsigned int CRCHelper::tryParsePolynom(const QString &text)
 {
@@ -67,4 +68,62 @@ std::vector<uint8_t> CRCHelper::tryParceByteArray(const QString& text)
         throw std::runtime_error(std::string("Ошибка разбора \"" + i.toStdString() + "\""));
     }
     return result;
+}
+
+QString CRCHelper::tryParceByteArrayToString(const QString& text)
+{
+    if(text.isEmpty())
+        throw std::runtime_error("Поле исходного текста пусто");
+
+    QString result;
+
+    QRegularExpression isHex("^(0x)?[0-9a-f]{2}$", QRegularExpression::CaseInsensitiveOption);
+    bool parseOk = false;
+    uint8_t temp = 0;
+
+    auto tokens = text.split(' ');
+    for(const auto& i : tokens)
+    {
+        if(i.contains(isHex))
+        {
+            temp = i.toUInt(&parseOk, 16);
+            if(parseOk)
+            {
+                result += QString::number(temp, 2);
+                continue;
+            }
+        }
+        throw std::runtime_error(std::string("Ошибка разбора \"" + i.toStdString() + "\""));
+    }
+    return result;
+}
+
+std::vector<uint8_t> CRCHelper::createByteArrayFromBinaryString(const QString& text)
+{
+    QString prepared = text.simplified().remove(' ');
+    if(prepared.isEmpty())
+        throw std::runtime_error("Поле исходного текста пусто");
+
+    bool converted = false;
+    uint8_t temp = 0;
+    std::vector<uint8_t> result;
+
+    for(int i = 0; i <= prepared.size() / 8; ++i)
+    {
+        temp = prepared.midRef(i*8, 8).toUInt(&converted, 2);
+        if(converted)
+            result.insert(result.begin(), temp);
+    }
+
+    return result;
+}
+
+int CRCHelper::findFirstSignificant(unsigned num)
+{
+    if (!num)
+        return 0;
+    unsigned ret = 1;
+    while (num >>= 1)
+        ret += 1;
+    return ret;
 }

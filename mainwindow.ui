@@ -30,7 +30,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="huffmanTab">
        <attribute name="title">
@@ -40,36 +40,6 @@
         <property name="spacing">
          <number>11</number>
         </property>
-        <item row="1" column="1">
-         <widget class="QGroupBox" name="decodeBox">
-          <property name="title">
-           <string>Декодирование</string>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_3">
-           <item>
-            <widget class="QTextEdit" name="encodedTextPre">
-             <property name="placeholderText">
-              <string>Закодированный текст</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="decodeButton">
-             <property name="text">
-              <string>Раскодировать</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QTextEdit" name="decodedText">
-             <property name="placeholderText">
-              <string>Раскодированный текст</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
         <item row="0" column="1">
          <widget class="QGroupBox" name="encodeBox">
           <property name="title">
@@ -133,7 +103,7 @@ p, li { white-space: pre-wrap; }
           </layout>
          </widget>
         </item>
-        <item row="0" column="0" rowspan="2">
+        <item row="0" column="0" rowspan="3">
          <widget class="QGroupBox" name="codeTable">
           <property name="title">
            <string>Таблица кодирования</string>
@@ -152,9 +122,82 @@ p, li { white-space: pre-wrap; }
             <number>11</number>
            </property>
            <item>
-            <widget class="QTableWidget" name="tableWidget"/>
+            <widget class="QTableWidget" name="huffmanTable">
+             <property name="font">
+              <font>
+               <pointsize>9</pointsize>
+              </font>
+             </property>
+             <property name="sortingEnabled">
+              <bool>false</bool>
+             </property>
+             <property name="cornerButtonEnabled">
+              <bool>false</bool>
+             </property>
+             <property name="columnCount">
+              <number>3</number>
+             </property>
+             <column>
+              <property name="text">
+               <string>Символ</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Количество</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Код</string>
+              </property>
+             </column>
+            </widget>
            </item>
           </layout>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QGroupBox" name="decodeBox">
+          <property name="title">
+           <string>Декодирование</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <widget class="QTextEdit" name="encodedTextPre">
+             <property name="placeholderText">
+              <string>Закодированный текст</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="decodeButton">
+             <property name="text">
+              <string>Раскодировать</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QTextEdit" name="decodedText">
+             <property name="placeholderText">
+              <string>Раскодированный текст</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QPushButton" name="pushButton">
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Переместить закодированный текст вниз</string>
+          </property>
          </widget>
         </item>
        </layout>
@@ -183,7 +226,7 @@ p, li { white-space: pre-wrap; }
            <item>
             <widget class="QPlainTextEdit" name="originalTextCRC">
              <property name="plainText">
-              <string>20 65 65 73</string>
+              <string>6B 69 6E 64</string>
              </property>
              <property name="placeholderText">
               <string>Введите исходные данные</string>
@@ -226,7 +269,7 @@ p, li { white-space: pre-wrap; }
            <item>
             <widget class="QLineEdit" name="polynomProcess">
              <property name="text">
-              <string>x^10+x^6+x^3+1</string>
+              <string>x^8+x^7+x^6+x^4+x^2+1</string>
              </property>
              <property name="placeholderText">
               <string>Введите полином в виде x^8+x^6+x^2+1</string>

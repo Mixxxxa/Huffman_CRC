@@ -25,11 +25,16 @@ public:
     };
 
     using FrequencyTable = std::map<char, size_t>;
+    using CodesTable = std::map<char, std::string>;
 
     Huffman();
     FrequencyTable getCharsAndItsCount(const std::string& text) const;
     TreeNode::ptr generateTree(const FrequencyTable& table) const;
-    std::map<char, std::string> getCodes(Huffman::TreeNode::ptr root) const;
+    CodesTable getCodes(Huffman::TreeNode::ptr root) const;
+    std::string encode(const std::string &text, const CodesTable& table) const;
+    std::string decode(const std::string &text, const CodesTable& table) const;
+    double avgCodeLenght(const std::string& text, const FrequencyTable& freq, const CodesTable& codes) const;
+    double entropy(const std::string &text, const Huffman::FrequencyTable &table) const;
 
 private:
 };
