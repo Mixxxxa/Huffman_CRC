@@ -1,24 +1,37 @@
 #ifndef HUFFMAN_H
 #define HUFFMAN_H
 
-#include <vector>
-#include <utility>
-#include <QString>
+#include <map>
+#include <string>
+#include <memory>
 
 class Huffman
 {
 public:
-    struct CodeTableEntry
+    struct TreeNode
     {
-        char character;
-        unsigned count;
+        using ptr = std::shared_ptr<TreeNode>;
+
+        TreeNode(char _ch, const size_t& _count) :
+            ch(_ch),
+            count(_count),
+            left(nullptr),
+            right(nullptr)
+        {}
+        char ch;
+        size_t count;
+        TreeNode::ptr left;
+        TreeNode::ptr right;
     };
 
+    using FrequencyTable = std::map<char, size_t>;
+
     Huffman();
-    void fillTable(const QString& text);
+    FrequencyTable getCharsAndItsCount(const std::string& text) const;
+    TreeNode::ptr generateTree(const FrequencyTable& table) const;
+    std::map<char, std::string> getCodes(Huffman::TreeNode::ptr root) const;
 
 private:
-    std::vector<CodeTableEntry> m_codeTable;
 };
 
 #endif // HUFFMAN_H

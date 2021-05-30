@@ -21,6 +21,8 @@ private slots:
     void on_checkCRCButton_clicked();
     void on_moveRight_clicked();
 
+    void on_encodeButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 };

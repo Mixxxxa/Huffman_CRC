@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "crchelper.h"
 #include "crc.h"
+#include "huffman.h"
 #include <vector>
 #include <stdexcept>
 #include <QMessageBox>
@@ -82,3 +83,23 @@ void MainWindow::on_moveRight_clicked()
 }
 
 
+
+void MainWindow::on_encodeButton_clicked()
+{
+    try
+    {
+        const auto text = ui->originalTextHuffman->toPlainText();
+
+        Huffman huf;
+        const auto& check = huf.getCharsAndItsCount(text.toStdString());
+        auto root = huf.generateTree(check);
+        auto codes = huf.getCodes(root);
+        for(const auto& i : codes)
+        {
+        }
+    }
+    catch (std::runtime_error& ex)
+    {
+        QMessageBox::warning(this, "Ошибка", ex.what());
+    }
+}
