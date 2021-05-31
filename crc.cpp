@@ -1,93 +1,94 @@
 #include "crc.h"
-#include <vector>
 #include <QDebug>
-#include <bitset>
 
 CRC::CRC() :
     m_polynom(0x65)
+{ }
+
+unsigned short CRC::calculate(const std::vector<bool> &data) const
 {
-}
+    // Скопировать исходные данные
+    auto dataExt = data;
+    // Дополнить данные нулями в конце
+    const unsigned degree = polynomDegree();
+    for(size_t i = 0; i < degree; ++i)
+        dataExt.push_back(false);
 
-//auto getBitset(size_t size)
-//{
-//    switch (size)
-//    {
-//    case 1:
-//        return std::bitset<1>(false);
-//    }
-//}
+    // Маска для указания на проверочный бит
+    const auto calcCheckBit = getCheckBitMask();
+    // Битовая маска для отсечения лишних данных
+    const unsigned short mask = getMask();
 
-unsigned char CRC::crc8(unsigned char *pcBlock, unsigned char len)
-{
-    unsigned char crc = 0x00;
-    unsigned char i;
-
-    while (len--)
+    unsigned crc = 0;
+    // Для каждого бита в данных...
+    for(size_t i = 0; i < dataExt.size(); ++i)
     {
-        crc ^= *pcBlock++;
-
-        for (i = 0; i < 8; i++)
+        // Получаем новый младший бит
+        if(dataExt[i])
+            crc |= 1;
+        // Если набралось достаточно бит...
+        if ((crc & calcCheckBit) != 0)
         {
-            crc = crc & 0x80 ? (crc << 1) ^ m_polynom : crc << 1;
-            qDebug() << crc;
+            // Делим их на полином
+            crc ^= m_polynom;
+            qDebug() << "+" << bin << QString::number(crc, 2).rightJustified(degree+1, '0');
         }
-
+        // Если бит не последний, то сдвигаем CRC
+        if(i != dataExt.size() - 1)
+            crc <<= 1;
     }
-
+    qDebug() << "+" << bin << QString::number(crc, 2).rightJustified(degree+1, '0');
+    //Отсекаем лишние данные
+    crc &= mask;
     return crc;
 }
 
-//CRC::uint8_t CRC::calculate(uint8_t *data, size_t len)
-//{
-//    //return crc8(data, len);
-//    uint8_t crc = 0;
-//    size_t i, j;
-//    for (i = 0; i < len; i++) {
-//        crc ^= data[i];
-//        for (j = 0; j < 8; j++) {
-//            qDebug() << crc;
-//            if ((crc & 0x80) != 0)
-//                crc = (uint8_t)((crc << 1) ^ m_polynom);
-//            else
-//                crc <<= 1;
-//            qDebug() << crc;
-//        }
-//    }
-//    return crc;
-//}
-
-#include "crchelper.h"
-
+// Возвращает битовую маску для отсечения лишних данных
 unsigned short CRC::getMask() const
 {
     unsigned short mask = 0;
-    const int digits = CRCHelper::findFirstSignificant(m_polynom);
-    for(int i = 0; i < digits; ++i)
-    {
+    const int digits = polynomDegree();
+    for(int i = 0; i < digits + 1; ++i)
         mask |= (1 << i);
-    }
     return mask;
 }
 
-unsigned short CRC::calculate(uint8_t *data, size_t len)
+// Возвращает проверочную маску для текущего полинома
+unsigned short CRC::getCheckBitMask() const
 {
-    unsigned short crc = 0;
-    size_t i, j;
-    for (i = 0; i < len; i++) {
-        crc ^= data[i];
-        for (j = 0; j < 8; j++) {
-            if ((crc & 0x80) != 0)
-            {
-                crc = (unsigned short)((crc << 1) ^ m_polynom);
-            }
-            else
-            {
-                crc <<= 1;
-            }
+    const int degree = polynomDegree();
+    return (1u << degree);
+}
+
+// Возвращает степень полинома
+unsigned CRC::polynomDegree() const
+{
+    if (!m_polynom)
+        return 0;
+
+    // Ищем старший бит и возвращаем его положение - 1
+    unsigned poly = m_polynom;
+    unsigned ret = 1;
+    while (poly >>= 1)
+        ret += 1;
+    return ret - 1;
+}
+
+unsigned short CRC::calculate(uint8_t *data, size_t len) const
+{
+    // Конвертируем массив байтов в массив битов
+    std::vector<bool> converted;
+    for (size_t i = 0; i < len; i++)
+    {
+        const auto cur = data[i];
+        for(int j = 7; j >= 0; --j)
+        {
+            converted.push_back(cur & (1 << j));
         }
     }
-    crc &= getMask();
-    return crc;
+
+    // Считаем CRC для массива битов
+    return calculate(converted);
 }
 
 unsigned short CRC::polynom() const

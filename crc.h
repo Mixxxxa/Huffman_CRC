@@ -1,22 +1,25 @@
 #ifndef CRC_H
 #define CRC_H
 
+#include <vector>
+
 class CRC
 {
 public:
-    typedef unsigned char uint8_t;
-
     CRC();
-    //uint8_t calculate(uint8_t* data, size_t len);
 
+    unsigned short calculate(const std::vector<bool>& data) const;
+    unsigned short calculate(uint8_t *data, size_t len) const;
+
+    unsigned polynomDegree() const;
     unsigned short polynom() const;
     void setPolynom(const unsigned short &polynom);
 
-    unsigned short calculate(uint8_t *data, size_t len);
-    unsigned short getMask() const;
 private:
-    unsigned char crc8(unsigned char *pcBlock, unsigned char len);
     unsigned short m_polynom;
+
+    unsigned short getMask() const;
+    unsigned short getCheckBitMask() const;
 };
 
 #endif // CRC_H

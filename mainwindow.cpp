@@ -6,13 +6,13 @@
 #include <vector>
 #include <stdexcept>
 #include <QMessageBox>
-#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->huffmanTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 }
 
 MainWindow::~MainWindow()
@@ -33,13 +33,12 @@ void MainWindow::on_calculateCRCButton_clicked()
             binText += QString::number(i, 2).rightJustified(8, '0');
         ui->originalTextCRCBin->setPlainText(binText);
 
-        auto bitsInPolynom = CRCHelper::findFirstSignificant(polynom);
-
         CRC crc;
         crc.setPolynom(polynom);
+
         auto check = crc.calculate(data.data(), data.size());
         ui->resultCRCHex->setText(QString::number(check, 16));
-        ui->resultCRCBin->setText(QString::number(check, 2).rightJustified(bitsInPolynom -1, '0'));
+        ui->resultCRCBin->setText(QString::number(check, 2).rightJustified(crc.polynomDegree(), '0'));
     }
     catch (std::runtime_error& ex)
     {
@@ -51,26 +50,17 @@ void MainWindow::on_checkCRCButton_clicked()
 {
     try
     {
-        QString text = ui->checkText->toPlainText().simplified().remove(' ');
-        QString calculatedCRC = ui->calculatedCRC->text();
-        if(!calculatedCRC.isEmpty())
-            text += calculatedCRC;
+        const QString text = ui->checkText->toPlainText().simplified().remove(' ');
 
         CRC crc;
         unsigned polynom = CRCHelper::tryParsePolynom(ui->polynomCheck->text());
         crc.setPolynom(polynom);
 
-        std::vector<uint8_t> data;
+        std::vector<bool> data;
+        for(const auto& ch : text)
+            data.push_back(ch == '1');
 
-        bool ok = false;
-        if(text.size() > 8)
-        {
-            for(int i = 0; i <= text.size() / 8; ++i)
-            {
-                data.push_back(text.midRef(i*8, 8).toUInt(&ok, 2));
-            }
-        }
-        auto result = crc.calculate(data.data(), data.size());
+        auto result = crc.calculate(data);
         ui->polynomCheckBin->setText(QString::number(crc.polynom(), 2));
         ui->crcCheckResult->setText(QString::number(result, 16));
     }
@@ -82,10 +72,9 @@ void MainWindow::on_checkCRCButton_clicked()
 
 void MainWindow::on_moveRight_clicked()
 {
-    ui->checkText->setPlainText(ui->originalTextCRCBin->toPlainText());
+    ui->checkText->setPlainText(ui->originalTextCRCBin->toPlainText() + ui->resultCRCBin->text());
+    ui->polynomCheck->setText(ui->polynomProcess->text());
 }
-
-
 
 void MainWindow::on_encodeButton_clicked()
 {
@@ -95,7 +84,7 @@ void MainWindow::on_encodeButton_clicked()
 
         Huffman huf;
         const auto& chars = huf.getCharsAndItsCount(text.toStdString());
-        auto root = huf.generateTree(chars);
+        const auto root = huf.generateTree(chars);
         auto codes = huf.getCodes(root);
 
         ui->huffmanTable->setRowCount(static_cast<int>(chars.size()));
@@ -120,7 +109,6 @@ void MainWindow::on_encodeButton_clicked()
             }
             ++i;
         }
-
         ui->encodedText->setText(huf.encode(text.toStdString(), codes).c_str());
 
         const auto avgCodeLength = huf.avgCodeLenght(text.toStdString(), chars, codes);
