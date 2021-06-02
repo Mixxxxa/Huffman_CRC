@@ -1,3 +1,6 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "huffman.h"
 #include <queue>
 #include <functional>
@@ -6,11 +9,8 @@
 
 static constexpr char NullValue = 0;
 
-Huffman::Huffman()
-{ }
-
 // Возвращает словарь со знаками и их количеством в тексте
-Huffman::FrequencyTable Huffman::getCharsAndItsCount(const std::string &text) const
+Huffman::FrequencyTable Huffman::getCharsAndItsCount(const std::string &text)
 {
     std::map<char, size_t> result;
     for(const auto& ch : text)
@@ -19,8 +19,9 @@ Huffman::FrequencyTable Huffman::getCharsAndItsCount(const std::string &text) co
 }
 
 // Создает дерево для кода Хаффмана
-Huffman::TreeNode::ptr Huffman::generateTree(const Huffman::FrequencyTable &table) const
+Huffman::TreeNode::ptr Huffman::generateTree(const Huffman::FrequencyTable &table)
 {
+    using namespace Huffman;
     // Компаратор для сравнения нод
     auto comp = [](const TreeNode::ptr& l, const TreeNode::ptr& r) -> bool
     {
@@ -55,8 +56,10 @@ Huffman::TreeNode::ptr Huffman::generateTree(const Huffman::FrequencyTable &tabl
 }
 
 // Возвращает словарь со знаками и их кодами
-Huffman::CodesTable Huffman::getCodes(Huffman::TreeNode::ptr root) const
+Huffman::CodesTable Huffman::getCodes(Huffman::TreeNode::ptr root)
 {
+    using namespace Huffman;
+    // Ошибка, если корень не существует
     if(!root)
         throw std::runtime_error("Ошибка генерации кодов");
 
@@ -64,18 +67,21 @@ Huffman::CodesTable Huffman::getCodes(Huffman::TreeNode::ptr root) const
 
     // Рекурсивная лямбда для поиска вглубь
     std::function<void(TreeNode::ptr, std::string)> getCode;
-    getCode = [&](Huffman::TreeNode::ptr root, std::string str)
+    getCode = [&](TreeNode::ptr root, std::string str)
     {
         if(!root)
             return;
 
+        // Если в текущей ноде есть символ
         if(root->ch != NullValue)
         {
+            // Добавляем его в результат
             result[root->ch] = str;
             return;
         }
         else
         {
+            // Продолжаем поиск
             getCode(root->left, str + "0");
             getCode(root->right, str + "1");
         }
@@ -85,26 +91,33 @@ Huffman::CodesTable Huffman::getCodes(Huffman::TreeNode::ptr root) const
 }
 
 // Кодирование
-std::string Huffman::encode(const std::string& text, const Huffman::CodesTable &table) const
+std::string Huffman::encode(const std::string& text, const Huffman::CodesTable &table)
 {
     std::string result;
-    for(const auto& ch : text)
-        result += table.at(ch);
+    try
+    {
+        for(const auto& ch : text)
+            result += table.at(ch);
+    }
+    catch (std::out_of_range&)
+    {
+        throw std::runtime_error("Ошибка кодирования");
+    }
     return result;
 }
 
 // Декодирование
-std::string Huffman::decode(const std::string &text, const Huffman::CodesTable &table) const
+std::string Huffman::decode(const std::string &text, const Huffman::CodesTable &table)
 {
     std::string encodedText = text;
     std::string decodedText;
     std::string buffer;
 
-    while (!encodedText.empty())
+    // Пока не обработали все символы закодированного текста...
+    for(const auto& ch : encodedText)
     {
-        buffer += encodedText.at(0);
-        // Не самое лучшее решение, но по-быстрому пойдет...
-        encodedText.erase(encodedText.begin());
+        // Получаем новый символ
+        buffer += ch;
         for(const auto& [key, value] : table)
         {
             if(value == buffer)
@@ -115,11 +128,16 @@ std::string Huffman::decode(const std::string &text, const Huffman::CodesTable &
             }
         }
     }
+    // Если все символы обработаны, но в буфере остались символы,
+    // то считаем что произошла ошибка
+    if(!buffer.empty())
+        throw std::runtime_error("Ошибка декодирования");
+
     return decodedText;
 }
 
 // Возвращает среднюю длину кода
-double Huffman::avgCodeLenght(const std::string &text, const Huffman::FrequencyTable &freq, const Huffman::CodesTable &codes) const
+double Huffman::avgCodeLenght(const std::string &text, const Huffman::FrequencyTable &freq, const Huffman::CodesTable &codes)
 {
     const double textLength = static_cast<double>(text.size());
 
@@ -134,7 +152,7 @@ double Huffman::avgCodeLenght(const std::string &text, const Huffman::FrequencyT
 }
 
 // Возвращает энтропию кода
-double Huffman::entropy(const std::string &text, const Huffman::FrequencyTable &table) const
+double Huffman::entropy(const std::string &text, const Huffman::FrequencyTable &table)
 {
     const double textLength = static_cast<double>(text.size());
     double ret = 0;

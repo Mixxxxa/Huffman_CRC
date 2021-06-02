@@ -7,19 +7,20 @@ class CRC
 {
 public:
     CRC();
+    CRC(const unsigned int polynom);
 
-    unsigned short calculate(const std::vector<bool>& data) const;
-    unsigned short calculate(uint8_t *data, size_t len) const;
+    unsigned int calculate(const std::vector<bool>& data) const;
+    unsigned int calculate(const uint8_t *data, size_t len) const;
 
     unsigned polynomDegree() const;
-    unsigned short polynom() const;
-    void setPolynom(const unsigned short &polynom);
+    unsigned int polynom() const;
+    void setPolynom(const unsigned int &polynom);
 
 private:
-    unsigned short m_polynom;
+    unsigned int m_polynom;
 
-    unsigned short getMask() const;
-    unsigned short getCheckBitMask() const;
+    unsigned int getMask() const;
+    unsigned int getCheckBitMask() const;
 };
 
 #endif // CRC_H

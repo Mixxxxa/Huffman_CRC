@@ -5,7 +5,6 @@
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
-class QPlainTextEdit;
 QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
@@ -20,11 +19,8 @@ private slots:
     void on_calculateCRCButton_clicked();
     void on_checkCRCButton_clicked();
     void on_moveRight_clicked();
-
     void on_encodeButton_clicked();
-
     void on_pushButton_clicked();
-
     void on_decodeButton_clicked();
 
 private:
