@@ -31,7 +31,7 @@ void MainWindow::on_calculateCRCButton_clicked()
         const auto data = CRCHelper::tryParceByteArray(ui->originalTextCRC->toPlainText());
         QString binText;
         for(const auto& i : data)
-            binText += QString::number(i, 2).rightJustified(8, '0');
+            binText += QString::number(i, 2).rightJustified(CHAR_BIT, '0');
         ui->originalTextCRCBin->setPlainText(binText);
 
         const unsigned polynom = CRCHelper::tryParsePolynom(ui->polynomProcess->text());
@@ -55,18 +55,19 @@ void MainWindow::on_checkCRCButton_clicked()
         const QString text = ui->checkText->toPlainText().simplified().remove(' ');
         const unsigned polynom = CRCHelper::tryParsePolynom(ui->polynomCheck->text());
 
-        std::vector<bool> data;
-        for(const auto& ch : text)
+        std::vector<bool> data(text.size());
+        for(size_t i = 0; i < data.size(); ++i)
         {
-            if(ch == '1')
-                data.push_back(true);
-            else if (ch == '0')
-                data.push_back(false);
+            const QChar& ch = text.at(static_cast<int>(i));
+            if(ch == '0')
+                continue;
+            else if(ch == '1')
+                data[i] = true;
             else
                 throw std::runtime_error(
-                        QString("Найден недопустимый символ в исходных данных: \"%1\"")
-                        .arg(ch).
-                        toStdString());
+                                        QString("Найден недопустимый символ в исходных данных: \"%1\"")
+                                        .arg(ch).
+                                        toStdString());
         }
 
         CRC crc(polynom);
