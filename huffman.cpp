@@ -38,16 +38,16 @@ Huffman::TreeNode::ptr Huffman::generateTree(const Huffman::FrequencyTable &tabl
     while(collection.size() != 1)
     {
         // Забираем два самых малых элемента из очереди
-        TreeNode::ptr left = collection.top();
+        TreeNode::ptr left = std::move(collection.top());
         collection.pop();
-        TreeNode::ptr right = collection.top();
+        TreeNode::ptr right = std::move(collection.top());
         collection.pop();
 
         // Создаем новый элемент со значением, равным сумме двух предыдущих,
         // а их записываем как листья нового элемента
-        auto top = std::make_shared<TreeNode>(NullValue, left->count+right->count);
-        top->left  = left;
-        top->right = right;
+        auto top = std::make_shared<TreeNode>(NullValue, left->count + right->count);
+        top->left  = std::move(left);
+        top->right = std::move(right);
         // Отправляем новый элемент в очередь
         collection.push(top);
     }
